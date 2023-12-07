@@ -15,7 +15,7 @@
 
 ## ライセンス
 
-[MIT License](https://github.com/imaoki/nkPoseStack/blob/main/LICENSE)
+[MIT License](https://github.com/imaoki/nkSnippet/blob/main/LICENSE)
 
 ## 開発環境
 
