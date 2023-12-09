@@ -1,7 +1,6 @@
 # nkSnippet
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkSnippet)](https://github.com/imaoki/nkSnippet/releases/latest)
-[![GitHub](https://img.shields.io/github/license/imaoki/nkSnippet)](https://github.com/imaoki/nkSnippet/blob/main/LICENSE)
 
 簡易スクリプトランチャー。
 
@@ -12,10 +11,6 @@
 * 任意のディレクトリ内のMELファイルをリスト化しダブルクリックで実行可能。
 
 * メインウィンドウはドッキング可能。
-
-## ライセンス
-
-[MIT License](https://github.com/imaoki/nkSnippet/blob/main/LICENSE)
 
 ## 開発環境
 
