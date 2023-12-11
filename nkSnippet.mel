@@ -58,6 +58,29 @@ proc saveScriptDirname() {
   optionVar -sv "nkSnippetScriptDirname" $scriptDirname;
 }
 
+/*-
+@returns <>
+*/
+proc executeScript() {
+  // print("executeScript\n"); // debug
+  string $filenameList = nkUIGetControl("nkSnippetWindow", "filenameList");
+  string $selectItem = textScrollListGetSelectItem($filenameList);
+  // print("  selectItem:" + $selectItem + "\n"); // debug
+  if (!`size $selectItem`) return;
+
+  string $scriptDirnameText = nkUIGetControl("nkSnippetWindow", "scriptDirnameText");
+  string $scriptsDirname = textFieldGrpGetText($scriptDirnameText);
+  string $scriptFilename = $scriptsDirname + "/" + $selectItem;
+  // print("  scriptFilename:" + $scriptFilename + "\n"); // debug
+
+  if (existsFilename($scriptFilename)) {
+    catch (eval ("source \"" + $scriptFilename + "\""));
+  }
+  else {
+    warning -n ("file: " + $scriptFilename + ": Does not exist");
+  }
+}
+
 // /////////////////////////////////////////////////////////////////////////////
 // UI
 // /////////////////////////////////////////////////////////////////////////////
@@ -187,22 +210,15 @@ proc refreshListButtonPressed() {
 */
 proc filenameListDoubleClicked() {
   // print("filenameListDoubleClicked\n"); // debug
-  string $filenameList = nkUIGetControl("nkSnippetWindow", "filenameList");
-  string $selectItem = textScrollListGetSelectItem($filenameList);
-  // print("  selectItem:" + $selectItem + "\n"); // debug
-  if (!`size $selectItem`) return;
+  executeScript();
+}
 
-  string $scriptDirnameText = nkUIGetControl("nkSnippetWindow", "scriptDirnameText");
-  string $scriptsDirname = textFieldGrpGetText($scriptDirnameText);
-  string $scriptFilename = $scriptsDirname + "/" + $selectItem;
-  // print("  scriptFilename:" + $scriptFilename + "\n"); // debug
-
-  if (existsFilename($scriptFilename)) {
-    catch (eval ("source \"" + $scriptFilename + "\""));
-  }
-  else {
-    warning -n ("file: " + $scriptFilename + ": Does not exist");
-  }
+/*-
+@returns <>
+*/
+proc executeButtonPressed() {
+  // print("executeButtonPressed\n"); // debug
+  executeScript();
 }
 
 /*-
@@ -224,6 +240,7 @@ global proc nkSnippetInvokeEvent(
             case "quitMenuItem": quitMenuItemSelected(); break;
             case "aboutMenuItem": aboutMenuItemSelected(); break;
             case "refreshListButton": refreshListButtonPressed(); break;
+            case "executeButton": executeButtonPressed(); break;
             default: break;
           }
           break;
@@ -298,6 +315,19 @@ global proc nkSnippetBuildMainWindow() {
 
       string $filenameList = `textScrollList -ams false -h 18 "filenameList"`;
 
+      string $scriptManipRow = `rowLayout
+          // -bgc 0.5 0.25 0.25
+          -nc 2
+          -adj 1
+          "scriptManipRow"`;
+        separator -st "none" -vis false;
+        string $executeButton = `iconTextButton
+            -ann "Execute"
+            // -bgc 0.25 0.5 0.5
+            -i "execute.png"
+            -w 23
+            "executeButton"`;
+
     setParent ..;
 
   formLayout -e
@@ -310,7 +340,10 @@ global proc nkSnippetBuildMainWindow() {
       -ac $filenameList "top" 5 $listManipRow
       -af $filenameList "left" 5
       -af $filenameList "right" 5
-      -af $filenameList "bottom" 5
+      -ac $filenameList "bottom" 5 $scriptManipRow
+      -af $scriptManipRow "left" 5
+      -af $scriptManipRow "right" 5
+      -af $scriptManipRow "bottom" 5
       $outerForm;
 
   workspaceControl -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
@@ -319,6 +352,7 @@ global proc nkSnippetBuildMainWindow() {
   textFieldGrp -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"scriptDirnameText\");" $scriptDirnameText;
   iconTextButton -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"refreshListButton\");" $refreshListButton;
   textScrollList -e -dcc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"dcc\", \"filenameList\");" $filenameList;
+  iconTextButton -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"executeButton\");" $executeButton;
 
   // print("  " + $nkSnippetWindow + "\n"); // debug
   // print("  " + $outerForm + "\n"); // debug
@@ -331,6 +365,8 @@ global proc nkSnippetBuildMainWindow() {
   // print("  " + $scriptDirnameText + "\n"); // debug
   // print("  " + $refreshListButton + "\n"); // debug
   // print("  " + $filenameList + "\n"); // debug
+  // print("  " + $scriptManipRow + "\n"); // debug
+  // print("  " + $executeButton + "\n"); // debug
 
   nkUIAppendControls({
     $nkSnippetWindow,
@@ -389,7 +425,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.2.0";
+  return "1.3.0";
 }
 
 /*-
