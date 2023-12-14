@@ -69,8 +69,8 @@ proc executeScript() {
   if (!`size $selectItem`) return;
 
   string $scriptDirnameText = nkUIGetControl("nkSnippetWindow", "scriptDirnameText");
-  string $scriptsDirname = textFieldGrpGetText($scriptDirnameText);
-  string $scriptFilename = $scriptsDirname + "/" + $selectItem;
+  string $scriptDirname = textFieldGrpGetText($scriptDirnameText);
+  string $scriptFilename = $scriptDirname + "/" + $selectItem;
   // print("  scriptFilename:" + $scriptFilename + "\n"); // debug
 
   if (existsFilename($scriptFilename)) {
@@ -125,11 +125,11 @@ proc updateFilenameList() {
   textScrollListRemoveAll($filenameList);
 
   string $scriptDirnameText = nkUIGetControl("nkSnippetWindow", "scriptDirnameText");
-  string $scriptsDirname = textFieldGrpGetText($scriptDirnameText);
-  // print("  scriptsDirname:" + $scriptsDirname + "\n"); // debug
+  string $scriptDirname = textFieldGrpGetText($scriptDirnameText);
+  // print("  scriptDirname:" + $scriptDirname + "\n"); // debug
 
-  if (existsDirname($scriptsDirname)) {
-    string $filenames[] = getScriptFilenames($scriptsDirname);
+  if (existsDirname($scriptDirname)) {
+    string $filenames[] = getScriptFilenames($scriptDirname);
     // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
     for ($filename in $filenames) {
       textScrollListAppend($filename, $filenameList);
@@ -180,6 +180,22 @@ proc aboutMenuItemSelected() {
 /*-
 @returns <>
 */
+proc executeButtonPressed() {
+  // print("executeButtonPressed\n"); // debug
+  executeScript();
+}
+
+/*-
+@returns <>
+*/
+proc filenameListDoubleClicked() {
+  // print("filenameListDoubleClicked\n"); // debug
+  executeScript();
+}
+
+/*-
+@returns <>
+*/
 proc scriptDirnameTextEntered() {
   // print("scriptDirnameTextEntered\n"); // debug
   string $scriptDirnameText = nkUIGetControl("nkSnippetWindow", "scriptDirnameText");
@@ -203,22 +219,6 @@ proc scriptDirnameTextEntered() {
 proc refreshListButtonPressed() {
   // print("refreshListButtonPressed\n"); // debug
   updateFilenameList();
-}
-
-/*-
-@returns <>
-*/
-proc filenameListDoubleClicked() {
-  // print("filenameListDoubleClicked\n"); // debug
-  executeScript();
-}
-
-/*-
-@returns <>
-*/
-proc executeButtonPressed() {
-  // print("executeButtonPressed\n"); // debug
-  executeScript();
 }
 
 /*-
