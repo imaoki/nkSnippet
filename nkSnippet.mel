@@ -151,7 +151,7 @@ proc aboutMenuItemSelected() {
         + "\n\nMIT License\nhttps://github.com/imaoki/nkSnippet"
       )
       -p (nkUIGetParentableWindow("nkSnippetWindow"))
-      -t "About nkSnippet";
+      -t "About - nkSnippet";
 }
 
 /*-
