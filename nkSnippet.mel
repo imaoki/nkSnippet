@@ -281,11 +281,11 @@ proc buildMainWindow() {
               "aboutMenuItem"`;
       setParent ..;
 
-      string $scriptManipRow = `rowLayout
+      string $topToolRow = `rowLayout
           -adj 2
           // -bgc 0.5 0.25 0.25
           -nc 2
-          "scriptManipRow"`;
+          "topToolRow"`;
         string $executeButton = `iconTextButton
             -ann "Execute"
             // -bgc 0.25 0.5 0.5
@@ -297,11 +297,11 @@ proc buildMainWindow() {
 
       string $filenameList = `textScrollList -ams false -h 31 "filenameList"`;
 
-      string $listManipRow = `rowLayout
+      string $bottomToolRow = `rowLayout
           -adj 1
           // -bgc 0.5 0.25 0.25
           -nc 2
-          "listManipRow"`;
+          "bottomToolRow"`;
         string $scriptDirnameText = `textFieldGrp
             -adj 2
             -cw2 0 10
@@ -321,16 +321,16 @@ proc buildMainWindow() {
       -af $menuBar "top" 0
       -af $menuBar "left" 0
       -af $menuBar "right" 0
-      -ac $scriptManipRow "top" 0 $menuBar
-      -af $scriptManipRow "left" 5
-      -af $scriptManipRow "right" 5
-      -ac $filenameList "top" 5 $scriptManipRow
+      -ac $topToolRow "top" 0 $menuBar
+      -af $topToolRow "left" 5
+      -af $topToolRow "right" 5
+      -ac $filenameList "top" 5 $topToolRow
       -af $filenameList "left" 5
       -af $filenameList "right" 5
-      -ac $filenameList "bottom" 5 $listManipRow
-      -af $listManipRow "left" 5
-      -af $listManipRow "right" 5
-      -af $listManipRow "bottom" 5
+      -ac $filenameList "bottom" 5 $bottomToolRow
+      -af $bottomToolRow "left" 5
+      -af $bottomToolRow "right" 5
+      -af $bottomToolRow "bottom" 5
       $outerForm;
 
   window -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
@@ -350,10 +350,10 @@ proc buildMainWindow() {
   // print("  " + $quitMenuItem + "\n"); // debug
   // print("  " + $helpMenu + "\n"); // debug
   // print("  " + $aboutMenuItem + "\n"); // debug
-  // print("  " + $scriptManipRow + "\n"); // debug
+  // print("  " + $topToolRow + "\n"); // debug
   // print("  " + $executeButton + "\n"); // debug
   // print("  " + $filenameList + "\n"); // debug
-  // print("  " + $listManipRow + "\n"); // debug
+  // print("  " + $bottomToolRow + "\n"); // debug
   // print("  " + $scriptDirnameText + "\n"); // debug
   // print("  " + $refreshListButton + "\n"); // debug
 
