@@ -4,37 +4,13 @@
 // ボイラープレート
 // /////////////////////////////////////////////////////////////////////////////
 // ファイル
-proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $regex1 = "^Mel procedure found in: *";string $regex2 = "^Script found in: *";if (`match $regex1 $thisIs` != "") {$filename = `substitute $regex1 $thisIs ""`;}else if (`match $regex2 $thisIs` != "") {$filename = `substitute $regex2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}
+/*1.0.0*/proc string escapeStringForPythonAtFile(string $input) {string $escapedText;int $size = `size $input`;for ($i = 1; $i <= $size; $i++) {string $c = `substring $input $i $i`;switch ($c) {case "\\": $escapedText += "\\\\"; break;case "'": $escapedText += "\\'"; break;case "\n": $escapedText += "\\n"; break;case "\r": $escapedText += "\\r"; break;default: $escapedText += $c; break;}}return $escapedText;}proc string getSourceFilename(string $procName) {string $filename;string $thisIs = `whatIs $procName`;string $pattern1 = "^Mel procedure found in: *";string $pattern2 = "^Script found in: *";if (`match $pattern1 $thisIs` != "") {$filename = `substitute $pattern1 $thisIs ""`;}else if (`match $pattern2 $thisIs` != "") {$filename = `substitute $pattern2 $thisIs ""`;}return $filename;}proc string getSourceDirname(string $procName) {return dirname(getSourceFilename($procName));}proc int existsDirname(string $dirname) {return `filetest -d $dirname`;}proc int existsFilename(string $filename) {return `filetest -f $filename`;}proc string[] getDirnames(string $dirname) {string $subDirnames[];string $filenames[] = `getFileList -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {string $subDirname = $dirname + "/" + $filenames[$i];if (existsDirname($subDirname)) {$subDirnames[`size $subDirnames`] = $subDirname;}}$subDirnames = `sort $subDirnames`;return $subDirnames;}proc string[] getFilenames(string $dirname, string $filenamePattern) {string $filenames[] = `getFileList -fs $filenamePattern -fld $dirname`;for ($i = 0; $i < `size $filenames`; $i++) {$filenames[$i] = $dirname + "/" + $filenames[$i];}$filenames = `sort $filenames`;return $filenames;}proc string[] readAllLines(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $lines[];if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f:" + " lines = tuple(s.rstrip() for s in f.readlines())");$lines = `python("lines")`;}return $lines;}proc string readAllText(string $filename, string $encoding) {if (!`size $encoding`) $encoding = "utf-8";string $text;if (existsFilename($filename)) {python("with open('" + $filename + "', 'r', encoding='" + $encoding + "') as f: text = f.read()");$text = `python("text")`;}return $text;}proc int writeAllText(string $filename, string $encoding, string $input) {string $dirname = dirname($filename);if (!existsDirname($dirname)) return false;$input = escapeStringForPythonAtFile($input);if (!`size $encoding`) $encoding = "utf-8";python("with open('" + $filename + "', 'w', encoding='" + $encoding + "') as f:" + " num = f.write('" + $input + "')");return (`python("num")` > 0);}
 // UIコントロール
-global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}
+/*1.0.0*/proc int windowGetExists(string $control) {return `window -q -ex $control`;}proc int windowGetVisible(string $control) {return `window -q -vis $control`;}proc windowClose(string $control) {if (windowGetExists($control)) {deleteUI $control;}}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}proc int isWorkspaceControl(string $control) {return `objectTypeUI $control` == "workspaceControl";}proc buildWorkspaceControl(string $workspaceControlName,string $mainProcName,string $buildProcName) {if (!workspaceControlGetExists($workspaceControlName)) {string $sourceFilename = getSourceFilename($mainProcName);string $uiScript = "if (!`exists " + $buildProcName + "`)" + " source \"" + $sourceFilename + "\"; " + $buildProcName + "();";string $nkSnippetWindow = `workspaceControl -dup false -fl true -l $mainProcName -rt false -ui $uiScript$workspaceControlName`;}}global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc string nkUIGetParentableWindow(string $windowName) {string $window = nkUIGetControl($windowName, $windowName);if (isWorkspaceControl($window) && !workspaceControlGetFloating($window)) {$window = "MayaWindow";}return $window;}
 
 // /////////////////////////////////////////////////////////////////////////////
 // コアプロシージャ
 // /////////////////////////////////////////////////////////////////////////////
-/*-
-@param $dirname <string>
-@returns <int>
-*/
-proc int existsDirname(string $dirname) {
-  return `filetest -d $dirname`;
-}
-
-/*-
-@param $filename <string>
-@returns <int>
-*/
-proc int existsFilename(string $filename) {
-  return `filetest -f $filename`;
-}
-
-/*-
-@param $dirname <string>
-@returns <string[]>
-*/
-proc string[] getScriptFilenames(string $dirname) {
-  return `getFileList -fld $dirname -fs "*.mel"`;
-}
-
 /*-
 @returns <string>
 */
@@ -56,6 +32,14 @@ proc saveScriptDirname() {
   string $scriptDirname = textFieldGrpGetText($scriptDirnameText);
   // print("  scriptDirname:" + $scriptDirname + "\n"); // debug
   optionVar -sv "nkSnippetScriptDirname" $scriptDirname;
+}
+
+/*-
+@param $dirname <string>
+@returns <string[]>
+*/
+proc string[] getScriptFilenames(string $dirname) {
+  return (getFilenames($dirname, "*.mel"));
 }
 
 /*-
@@ -84,21 +68,6 @@ proc executeScript() {
 // /////////////////////////////////////////////////////////////////////////////
 // UI
 // /////////////////////////////////////////////////////////////////////////////
-// -----------------------------------------------------------------------------
-// UIコントロールイベント
-// -----------------------------------------------------------------------------
-/*-
-@returns <string>
-*/
-proc string getParentWindow() {
-  string $parentWindow = "MayaWindow";
-  string $nkSnippetWindow = nkUIGetControl("nkSnippetWindow", "nkSnippetWindow");
-  if (workspaceControlGetFloating($nkSnippetWindow)) {
-    $parentWindow = $nkSnippetWindow;
-  }
-  return $parentWindow;
-}
-
 /*-
 @param $input <string>
 @returns <string>
@@ -132,11 +101,14 @@ proc updateFilenameList() {
     string $filenames[] = getScriptFilenames($scriptDirname);
     // print("  filenames:{\n    " + stringArrayToString($filenames, ",\n    ") + "\n  }\n"); // debug
     for ($filename in $filenames) {
-      textScrollListAppend($filename, $filenameList);
+      textScrollListAppend(basename($filename, ""), $filenameList);
     }
   }
 }
 
+// -----------------------------------------------------------------------------
+// UIコントロールイベント
+// -----------------------------------------------------------------------------
 /*-
 @returns <>
 */
@@ -152,13 +124,7 @@ proc quitMenuItemSelected() {
   // print("quitMenuItemSelected\n"); // debug
   string $nkSnippetWindow = nkUIGetControl("nkSnippetWindow", "nkSnippetWindow");
   // print("  nkSnippetWindow:" + $nkSnippetWindow + "\n"); // debug
-  int $exists = workspaceControlGetExists($nkSnippetWindow);
-  // print("    exists   :" + $exists + "\n"); // debug
-  if (!$exists) return;
-  int $isVisible = workspaceControlGetVisible($nkSnippetWindow);
-  // print("    isVisible:" + $isVisible + "\n"); // debug
-  if (!$isVisible) return;
-  workspaceControlClose($nkSnippetWindow);
+  windowClose($nkSnippetWindow);
 }
 
 /*-
@@ -171,9 +137,9 @@ proc aboutMenuItemSelected() {
       -db "OK"
       -m (
         "nkSnippet " + (nkSnippetVersion())
-        + "\n\n(c) 2023 imaoki | MIT License | https://github.com/imaoki"
+        + "\n\nMIT License\nhttps://github.com/imaoki/nkSnippet"
       )
-      -p (getParentWindow())
+      -p (nkUIGetParentableWindow("nkSnippetWindow"))
       -t "About nkSnippet";
 }
 
@@ -270,11 +236,16 @@ global proc nkSnippetInvokeEvent(
 /*-
 @returns <>
 */
-global proc nkSnippetBuildMainWindow() {
-  // print("nkSnippetBuildMainWindow\n"); // debug
+proc buildMainWindow() {
+  // print("buildMainWindow\n"); // debug
+  windowClose("nkSnippetWindow");
 
-  string $nkSnippetWindow = `setParent -q`;
-  // print("  nkSnippetWindow:" + $nkSnippetWindow + "\n"); // debug
+  string $nkSnippetWindow = `window
+      -mxb false
+      -mnb false
+      -s true
+      -t "nkSnippet"
+      "nkSnippetWindow"`;
     string $outerForm = `formLayout "outerForm"`;
       string $menuBar = `menuBarLayout
           // -bgc 0.25 0.5 0.25
@@ -346,7 +317,7 @@ global proc nkSnippetBuildMainWindow() {
       -af $listManipRow "bottom" 5
       $outerForm;
 
-  workspaceControl -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
+  window -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
   menuItem -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"quitMenuItem\");" $quitMenuItem;
   menuItem -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"aboutMenuItem\");" $aboutMenuItem;
   iconTextButton -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"executeButton\");" $executeButton;
@@ -375,26 +346,9 @@ global proc nkSnippetBuildMainWindow() {
   });
 
   updateFilenameList();
-}
 
-/*-
-@returns <>
-*/
-proc buildMainWorkspaceControl() {
-  // print("buildMainWorkspaceControl\n"); // debug
-  if (!workspaceControlGetExists("nkSnippetWindow")) {
-    string $sourceFilename = getSourceFilename("nkSnippet");
-    string $uiScript = "if (!`exists nkSnippetBuildMainWindow`)"
-        + " source \"" + $sourceFilename + "\";"
-        + " nkSnippetBuildMainWindow();";
-    string $nkSnippetWindow = `workspaceControl
-        -dup false
-        -fl true
-        -l "nkSnippet"
-        -rt false
-        -ui $uiScript
-        "nkSnippetWindow"`;
-  }
+  setFocus $nkSnippetWindow;
+  showWindow $nkSnippetWindow;
 }
 
 // -----------------------------------------------------------------------------
@@ -413,7 +367,7 @@ proc buildMainWorkspaceControl() {
 @returns <>
 */
 proc initialize() {
-  buildMainWorkspaceControl();
+  buildMainWindow();
   // registerScriptJob();
 }
 
@@ -421,7 +375,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.3.1";
+  return "1.3.2";
 }
 
 /*-
