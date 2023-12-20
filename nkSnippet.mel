@@ -295,7 +295,11 @@ proc buildMainWindow() {
         separator -st "none" -vis false;
       setParent ..;
 
-      string $filenameList = `textScrollList -ams false -h 31 "filenameList"`;
+      string $filenameList = `textScrollList
+          -ams false
+          -ekf false
+          -h 31
+          "filenameList"`;
 
       string $bottomToolRow = `rowLayout
           -adj 1
@@ -393,7 +397,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.4.0";
+  return "1.4.1";
 }
 
 /*-
