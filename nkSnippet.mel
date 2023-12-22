@@ -9,7 +9,7 @@
 /*1.1.0*/proc int windowGetExists(string $control) {return `window -q -ex $control`;}proc int windowGetVisible(string $control) {return `window -q -vis $control`;}proc windowClose(string $control) {if (windowGetExists($control)) {deleteUI $control;}}proc windowPrefRemove(string $control) {if (windowGetExists($control)) windowClose($control);if (`windowPref -ex $control`) windowPref -r $control;}proc int[] checkBoxGrpGetEnable(string $control) {return `checkBoxGrp -q -en $control`;}proc checkBoxGrpSetEnable(int $enable, string $control) {checkBoxGrp -e -en $enable $control;}proc int[] checkBoxGrpGetValues(int $ncb, string $control) {$ncb = `clamp 1 4 $ncb`;int $values[];if ($ncb > 0) $values[0] = `checkBoxGrp -q -v1 $control`;if ($ncb > 1) $values[1] = `checkBoxGrp -q -v2 $control`;if ($ncb > 2) $values[2] = `checkBoxGrp -q -v3 $control`;if ($ncb > 3) $values[3] = `checkBoxGrp -q -v4 $control`;return $values;}proc checkBoxGrpSetValues(int $values[], string $control) {int $ncb = `size $values`;if ($ncb > 0) checkBoxGrp -e -v1 $values[0] $control;if ($ncb > 1) checkBoxGrp -e -v2 $values[1] $control;if ($ncb > 2) checkBoxGrp -e -v3 $values[2] $control;if ($ncb > 3) checkBoxGrp -e -v4 $values[3] $control;}proc int radioButtonGrpGetEnable(string $control) {return `radioButtonGrp -q -en $control`;}proc radioButtonGrpSetEnable(int $enable, string $control) {radioButtonGrp -e -en $enable $control;}proc int radioButtonGrpGetSelect(string $control) {return (`radioButtonGrp -q -sl $control` - 1);}proc radioButtonGrpSetSelect(int $index, string $control) {radioButtonGrp -e -sl ($index + 1) $control;}proc int textFieldGrpGetEnable(string $control) {return `textFieldGrp -q -en $control`;}proc textFieldGrpSetEnable(int $enable, string $control) {textFieldGrp -e -en $enable $control;}proc int textFieldGrpGetInsertionPosition(string $control) {return (`textFieldGrp -q -ip $control` - 1);}proc textFieldGrpSetInsertionPosition(int $position, string $control) {textFieldGrp -e -ip ($position + 1) $control;}proc string textFieldGrpGetText(string $control) {return `textFieldGrp -q -tx $control`;}proc textFieldGrpSetText(string $text, string $control) {textFieldGrp -e -tx $text $control;}proc textScrollListAppend(string $label, string $control) {textScrollList -e -a $label $control;}proc textScrollListAppendPosition(int $index, string $label, string $control) {textScrollList -e -ap ($index + 1) $label $control;}proc textScrollListRemoveAll(string $control) {textScrollList -e -ra $control;}proc textScrollListRemoveIndexedItem(int $index, string $control) {textScrollList -e -rii ($index + 1) $control;}proc textScrollListSetSelectIndexedItem(int $index, string $control) {textScrollList -e -sii ($index + 1) $control;}proc textScrollListSetSelectIndexedItems(int $indices[], string $control) {for ($i in $indices) {textScrollList -e -sii ($i + 1) $control;}}proc int[] textScrollListGetSelectIndexedItems(string $control) {int $indices[] = `textScrollList -q -sii $control`;for ($i = 0; $i < `size $indices`; $i++) $indices[$i] -= 1;return $indices;}proc int textScrollListGetSelectIndexedItem(string $control) {int $indices[] = textScrollListGetSelectIndexedItems($control);return ((`size $indices`) ? $indices[0] : -1);}proc string[] textScrollListGetSelectItems(string $control) {return `textScrollList -q -si $control`;}proc string textScrollListGetSelectItem(string $control) {string $items[] = textScrollListGetSelectItems($control);return ((`size $items`) ? $items[0] : "");}proc workspaceControlClose(string $control) {workspaceControl -e -cl $control;}proc int workspaceControlGetExists(string $control) {return `workspaceControl -q -ex $control`;}proc int workspaceControlGetFloating(string $control) {return `workspaceControl -q -fl $control`;}proc workspaceControlSetFloating(int $state, string $control) {workspaceControl -e -fl $state $control;}proc int workspaceControlGetVisible(string $control) {return `workspaceControl -q -vis $control`;}proc int isWorkspaceControl(string $control) {return `objectTypeUI $control` == "workspaceControl";}proc buildWorkspaceControl(string $workspaceControlName,string $mainProcName,string $buildProcName) {if (!workspaceControlGetExists($workspaceControlName)) {string $sourceFilename = getSourceFilename($mainProcName);string $uiScript = "if (!`exists " + $buildProcName + "`)" + " source \"" + $sourceFilename + "\"; " + $buildProcName + "();";string $nkSnippetWindow = `workspaceControl -dup false -fl true -l $mainProcName -rt false -ui $uiScript$workspaceControlName`;}}global string $nkUIControls[];proc nkUIAppendControls(string $controls[]) {global string $nkUIControls[];for ($control in $controls) {$nkUIControls[`size $nkUIControls`] = $control;}}proc nkUIRemoveControls(string $root, string $end) {global string $nkUIControls[];string $paths[];for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";int $shouldRemove = (!`size $end`) ? $first == $root : $first == $root && $last == $end;if ($shouldRemove) $paths[`size $paths`] = $control;}if (`size $paths` > 0) {$nkUIControls = stringArrayRemove($paths, $nkUIControls);}}proc string nkUIGetControl(string $root, string $end) {global string $nkUIControls[];string $path;for ($control in $nkUIControls) {string $buffer[];int $depth = `tokenize $control "|" $buffer`;string $first = ($depth > 0) ? $buffer[0] : "";string $last = ($depth > 0) ? $buffer[$depth - 1] : "";if ($first == $root && $last == $end) {$path = $control;break;}}return $path;}proc string nkUIGetParentableWindow(string $windowName) {string $window = nkUIGetControl($windowName, $windowName);if (isWorkspaceControl($window) && !workspaceControlGetFloating($window)) {$window = "MayaWindow";}return $window;}
 
 // /////////////////////////////////////////////////////////////////////////////
-// コアプロシージャ
+// ドメイン
 // /////////////////////////////////////////////////////////////////////////////
 /*-
 @returns <string>
@@ -66,7 +66,7 @@ proc executeScript() {
 }
 
 // /////////////////////////////////////////////////////////////////////////////
-// UI
+// プレゼンテーション
 // /////////////////////////////////////////////////////////////////////////////
 /*-
 @param $input <string>
@@ -107,7 +107,7 @@ proc updateFilenameList() {
 }
 
 // -----------------------------------------------------------------------------
-// UIコントロールイベント
+// UIコントロールイベントハンドラ
 // -----------------------------------------------------------------------------
 /*-
 @returns <>
@@ -148,7 +148,7 @@ proc aboutMenuItemSelected() {
       -db "OK"
       -m (
         "nkSnippet " + (nkSnippetVersion())
-        + "\n\nMIT License\nhttps://github.com/imaoki/nkSnippet"
+            + "\n\nMIT License\nhttps://github.com/imaoki/nkSnippet"
       )
       -p (nkUIGetParentableWindow("nkSnippetWindow"))
       -t "About - nkSnippet";
@@ -196,50 +196,6 @@ proc scriptDirnameTextEntered() {
 proc refreshListButtonPressed() {
   // print("refreshListButtonPressed\n"); // debug
   updateFilenameList();
-}
-
-/*-
-@param $window <string>
-@param $event <string>
-@param $control <string>
-@returns <>
-*/
-global proc nkSnippetInvokeEvent(
-  string $window,
-  string $event,
-  string $control
-) {
-  switch ($window) {
-    case "nkSnippetWindow":
-      switch ($event) {
-        case "c":
-          switch ($control) {
-            case "resetWindowMenuItem": resetWindowMenuItemSelected(); break;
-            case "quitMenuItem": quitMenuItemSelected(); break;
-            case "aboutMenuItem": aboutMenuItemSelected(); break;
-            case "refreshListButton": refreshListButtonPressed(); break;
-            case "executeButton": executeButtonPressed(); break;
-            default: break;
-          }
-          break;
-        case "cc":
-          switch ($control) {
-            case "nkSnippetWindow": nkSnippetWindowClosed(); break;
-            case "scriptDirnameText": scriptDirnameTextEntered(); break;
-            default: break;
-          }
-          break;
-        case "dcc":
-          switch ($control) {
-            case "filenameList": filenameListDoubleClicked(); break;
-            default: break;
-          }
-          break;
-        default: break;
-      }
-      break;
-    default: break;
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -337,14 +293,14 @@ proc buildMainWindow() {
       -af $bottomToolRow "bottom" 5
       $outerForm;
 
-  window -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
-  menuItem -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"resetWindowMenuItem\");" $resetWindowMenuItem;
-  menuItem -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"quitMenuItem\");" $quitMenuItem;
-  menuItem -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"aboutMenuItem\");" $aboutMenuItem;
-  iconTextButton -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"executeButton\");" $executeButton;
-  textScrollList -e -dcc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"dcc\", \"filenameList\");" $filenameList;
-  textFieldGrp -e -cc "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"cc\", \"scriptDirnameText\");" $scriptDirnameText;
-  iconTextButton -e -c "nkSnippetInvokeEvent(\"nkSnippetWindow\", \"c\", \"refreshListButton\");" $refreshListButton;
+  window -e -cc "nkSnippetEventController(\"nkSnippetWindow\", \"cc\", \"nkSnippetWindow\");" $nkSnippetWindow;
+  menuItem -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"resetWindowMenuItem\");" $resetWindowMenuItem;
+  menuItem -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"quitMenuItem\");" $quitMenuItem;
+  menuItem -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"aboutMenuItem\");" $aboutMenuItem;
+  iconTextButton -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"executeButton\");" $executeButton;
+  textScrollList -e -dcc "nkSnippetEventController(\"nkSnippetWindow\", \"dcc\", \"filenameList\");" $filenameList;
+  textFieldGrp -e -cc "nkSnippetEventController(\"nkSnippetWindow\", \"cc\", \"scriptDirnameText\");" $scriptDirnameText;
+  iconTextButton -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"refreshListButton\");" $refreshListButton;
 
   // print("  " + $nkSnippetWindow + "\n"); // debug
   // print("  " + $outerForm + "\n"); // debug
@@ -368,13 +324,70 @@ proc buildMainWindow() {
   });
 
   updateFilenameList();
-
-  setFocus $nkSnippetWindow;
   showWindow $nkSnippetWindow;
 }
 
 // -----------------------------------------------------------------------------
-// システムイベント
+// イベントコントローラ
+// -----------------------------------------------------------------------------
+/*-
+@param $window <string>
+@param $event <string>
+@param $control <string>
+@returns <>
+*/
+global proc nkSnippetEventController(
+  string $window,
+  string $event,
+  string $control
+) {
+  // print("nkSnippetEventController\n"); // debug
+  // print("  window :" + $window + "\n"); // debug
+  // print("  event  :" + $event + "\n"); // debug
+  // print("  control:" + $control + "\n"); // debug
+  switch ($window) {
+    case "nkSnippetWindow":
+      switch ($event) {
+        case "c":
+          switch ($control) {
+            case "resetWindowMenuItem": resetWindowMenuItemSelected(); break;
+            case "quitMenuItem": quitMenuItemSelected(); break;
+            case "aboutMenuItem": aboutMenuItemSelected(); break;
+            case "refreshListButton": refreshListButtonPressed(); break;
+            case "executeButton": executeButtonPressed(); break;
+            default: break;
+          }
+          break;
+        case "cc":
+          switch ($control) {
+            case "nkSnippetWindow": nkSnippetWindowClosed(); break;
+            case "scriptDirnameText": scriptDirnameTextEntered(); break;
+            default: break;
+          }
+          break;
+        case "dcc":
+          switch ($control) {
+            case "filenameList": filenameListDoubleClicked(); break;
+            default: break;
+          }
+          break;
+        default: break;
+      }
+      break;
+    default: break;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// ドメインイベントハンドラ
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// システムイベントハンドラ
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// メイン
 // -----------------------------------------------------------------------------
 /*-
 @returns <>
@@ -382,9 +395,6 @@ proc buildMainWindow() {
 // proc registerScriptJob() {
 // }
 
-// -----------------------------------------------------------------------------
-// メイン
-// -----------------------------------------------------------------------------
 /*-
 @returns <>
 */
@@ -397,7 +407,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.4.1";
+  return "1.4.2";
 }
 
 /*-
