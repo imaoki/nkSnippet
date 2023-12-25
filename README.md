@@ -18,11 +18,10 @@ Maya 2022.5 / Windows 10
 
 01. `nkSnippet.mel`をスクリプトディレクトリにコピー
 
-    英語版
-    : `%MAYA_APP_DIR%\<version>\scripts`
-
-    日本語版
-    : `%MAYA_APP_DIR%\<version>\ja_JP\scripts`
+    | バージョン | ディレクトリ                             |
+    | ---------- | ---------------------------------------- |
+    | 英語版     | `%MAYA_APP_DIR%\<version>\scripts`       |
+    | 日本語版   | `%MAYA_APP_DIR%\<version>\ja_JP\scripts` |
 
 02. Mayaを再起動
 
