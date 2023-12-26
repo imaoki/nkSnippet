@@ -16,22 +16,21 @@
 */
 proc string loadScriptDirname() {
   // print("loadScriptDirname\n"); // debug
-  string $scriptDirname;
+  string $dirname;
   if (`optionVar -ex "nkSnippetScriptDirname"`) {
-    $scriptDirname = `optionVar -q "nkSnippetScriptDirname"`;
+    $dirname = `optionVar -q "nkSnippetScriptDirname"`;
   }
-  return $scriptDirname;
+  return $dirname;
 }
 
 /*-
+@param $dirname <string>
 @returns <>
 */
-proc saveScriptDirname() {
+proc saveScriptDirname(string $dirname) {
   // print("saveScriptDirname\n"); // debug
-  string $scriptDirnameText = getUIControl("nkSnippetWindow", "scriptDirnameText");
-  string $scriptDirname = qString("textFieldGrp", "-tx", $scriptDirnameText);
-  // print("  scriptDirname:" + $scriptDirname + "\n"); // debug
-  optionVar -sv "nkSnippetScriptDirname" $scriptDirname;
+  // print("  dirname:" + $dirname + "\n"); // debug
+  optionVar -sv "nkSnippetScriptDirname" $dirname;
 }
 
 /*-
@@ -43,23 +42,17 @@ proc string[] getScriptFilenames(string $dirname) {
 }
 
 /*-
+@param $filename <string>
 @returns <>
 */
-proc executeScript() {
+proc executeScript(string $filename) {
   // print("executeScript\n"); // debug
-  string $filenameList = getUIControl("nkSnippetWindow", "filenameList");
-  string $selectItem = qFirstString("textScrollList", "-si", $filenameList);
-  // print("  selectItem:" + $selectItem + "\n"); // debug
-  if (!`size $selectItem`) return;
-  string $scriptDirnameText = getUIControl("nkSnippetWindow", "scriptDirnameText");
-  string $scriptDirname = qString("textFieldGrp", "-tx", $scriptDirnameText);
-  string $scriptFilename = $scriptDirname + "/" + $selectItem;
-  // print("  scriptFilename:" + $scriptFilename + "\n"); // debug
-  if (existsFilename($scriptFilename)) {
-    catch (eval ("source \"" + $scriptFilename + "\""));
+  // print("  filename:" + $filename + "\n"); // debug
+  if (existsFilename($filename)) {
+    catch (eval ("source \"" + $filename + "\""));
   }
   else {
-    warning -n ("file: " + $scriptFilename + ": Does not exist");
+    warning -n ("file: " + $filename + ": Does not exist");
   }
 }
 
@@ -100,6 +93,25 @@ proc updateFilenameList() {
       eString("textScrollList", "-a", basename($filename, ""), $filenameList);
     }
   }
+}
+
+/*-
+@returns <string>
+*/
+proc string getScriptDirname() {
+  // print("getScriptDirname\n"); // debug
+  string $scriptDirnameText = getUIControl("nkSnippetWindow", "scriptDirnameText");
+  return qString("textFieldGrp", "-tx", $scriptDirnameText);
+}
+
+/*-
+@returns <string>
+*/
+proc string getSelectedScriptFilename() {
+  // print("getSelectedScriptFilename\n"); // debug
+  string $filenameList = getUIControl("nkSnippetWindow", "filenameList");
+  string $filename = qFirstString("textScrollList", "-si", $filenameList);
+  return (getScriptDirname() + "/" + $filename);
 }
 
 // -----------------------------------------------------------------------------
@@ -155,7 +167,7 @@ proc aboutMenuItemSelected() {
 */
 proc executeButtonPressed() {
   // print("executeButtonPressed\n"); // debug
-  executeScript();
+  executeScript(getSelectedScriptFilename());
 }
 
 /*-
@@ -163,7 +175,7 @@ proc executeButtonPressed() {
 */
 proc filenameListDoubleClicked() {
   // print("filenameListDoubleClicked\n"); // debug
-  executeScript();
+  executeScript(getSelectedScriptFilename());
 }
 
 /*-
@@ -182,7 +194,7 @@ proc scriptDirnameTextEntered() {
     eString("textFieldGrp", "-tx", $newText, $scriptDirnameText);
     eIndex("textFieldGrp", "-ip", $position, $scriptDirnameText);
   }
-  saveScriptDirname();
+  saveScriptDirname(getScriptDirname());
   updateFilenameList();
 }
 
@@ -403,7 +415,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.5.0";
+  return "1.6.0";
 }
 
 /*-
