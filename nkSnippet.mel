@@ -130,9 +130,7 @@ proc nkSnippetWindowClosed() {
 */
 proc resetWindowMenuItemSelected() {
   // print("resetWindowMenuItemSelected\n"); // debug
-  string $nkSnippetWindow = getUIControl("nkSnippetWindow", "nkSnippetWindow");
-  // print("  nkSnippetWindow:" + $nkSnippetWindow + "\n"); // debug
-  windowPrefRemove("window", $nkSnippetWindow);
+  windowPrefRemove("window", "nkSnippetWindow");
   nkSnippet();
 }
 
@@ -415,7 +413,7 @@ proc initialize() {
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.6.1";
+  return "1.6.2";
 }
 
 /*-
