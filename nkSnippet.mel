@@ -326,21 +326,6 @@ proc buildMainWindow() {
   textFieldGrp -e -cc "nkSnippetEventController(\"nkSnippetWindow\", \"cc\", \"scriptDirnameText\");" $scriptDirnameText;
   iconTextButton -e -c "nkSnippetEventController(\"nkSnippetWindow\", \"c\", \"refreshListButton\");" $refreshListButton;
 
-  // print("  " + $nkSnippetWindow + "\n"); // debug
-  // print("  " + $outerForm + "\n"); // debug
-  // print("  " + $menuBar + "\n"); // debug
-  // print("  " + $fileMenu + "\n"); // debug
-  // print("  " + $resetWindowMenuItem + "\n"); // debug
-  // print("  " + $quitMenuItem + "\n"); // debug
-  // print("  " + $helpMenu + "\n"); // debug
-  // print("  " + $aboutMenuItem + "\n"); // debug
-  // print("  " + $topToolRow + "\n"); // debug
-  // print("  " + $executeButton + "\n"); // debug
-  // print("  " + $filenameList + "\n"); // debug
-  // print("  " + $bottomToolRow + "\n"); // debug
-  // print("  " + $scriptDirnameText + "\n"); // debug
-  // print("  " + $refreshListButton + "\n"); // debug
-
   appendUIControls({
     $nkSnippetWindow,
     $scriptDirnameText,
