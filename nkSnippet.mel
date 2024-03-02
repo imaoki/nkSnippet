@@ -334,6 +334,7 @@ proc buildMainWindow() {
 
   updateFilenameList();
   showWindow $nkSnippetWindow;
+  setFocus $nkSnippetWindow;
 }
 
 // -----------------------------------------------------------------------------
@@ -402,7 +403,7 @@ global proc nkSnippetEventController(
 @returns <string>
 */
 global proc string nkSnippetVersion() {
-  return "1.6.5";
+  return "1.6.6";
 }
 
 /*-
