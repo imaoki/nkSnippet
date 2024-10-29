@@ -2,7 +2,7 @@
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkSnippet)](https://github.com/imaoki/nkSnippet/releases/latest)
 
-簡易スクリプトランチャー。
+簡易MELランチャー。
 
 ## 特徴
 
@@ -30,7 +30,3 @@ Maya 2022.5 / Windows 10
 ```mel
 nkSnippet;
 ```
-
-## 制限
-
-* 現在のところはMELファイルのみ対応。
