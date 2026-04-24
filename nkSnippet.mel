@@ -413,13 +413,12 @@ global proc nkSnippet() {
   // ライブラリ初期化
   // nkLibraryInitialize(false);
 
+  // ツール初期化
+  // nkTemplateInitialize();
+
   buildMainWindow();
   // registerEventJob();
 }
-
-// -----------------------------------------------------------------------------
-// ツール初期化
-// -----------------------------------------------------------------------------
 
 /*
 eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkSnippet/nkSnippet.mel\"");
@@ -449,6 +448,9 @@ proc test0() {
 global proc nkSnippetTest(int $num) {
   // ライブラリ初期化
   // nkLibraryInitialize(false);
+
+  // ツール初期化
+  // nkTemplateInitialize();
 
   if ($num < 0 || $num == 0) test0();
 }
