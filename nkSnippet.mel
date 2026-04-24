@@ -411,7 +411,7 @@ global proc string nkSnippetVersion() {
 */
 global proc nkSnippet() {
   // ライブラリ初期化
-  // nkTemplateInitialize(false);
+  // nkLibraryInitialize(false);
 
   buildMainWindow();
   // registerEventJob();
@@ -448,7 +448,7 @@ proc test0() {
 */
 global proc nkSnippetTest(int $num) {
   // ライブラリ初期化
-  // nkTemplateInitialize(false);
+  // nkLibraryInitialize(false);
 
   if ($num < 0 || $num == 0) test0();
 }
